@@ -4,8 +4,6 @@ import time
 
 time.sleep(60)
 
-import hdfs
-
 batchsize = 100
 
 try:
@@ -21,17 +19,26 @@ try:
 except:
   raise Exception('kafka connect error')
 
+from hdfs import InsecureClient
+import uuid
+
+
+client = InsecureClient("http://namenode:9870", user='hdfs')
+if 'data' not in client.list('/'):
+    client.makedirs("/data")
 
 msgs, count = [], 0
 for message in consumer:
     msg = str(message.value)
     
-    msgs.append(msg)
+    msgs.append(msg+"\n")
     count += 1
     
     if count >= batchsize:
-      hdfs.write_to_hdfs("\n".join(msgs))
-      msgs, count = [], 0
-      print("Topic A flush")
+        with open('./data-temp.txt', 'w') as f:
+            f.writelines(msgs)
+        client.upload('/data/{}.txt'.format(uuid.uuid1()), './data-temp.txt')
+        msgs, count = [], 0
+        print("Topic A flush")
     
     

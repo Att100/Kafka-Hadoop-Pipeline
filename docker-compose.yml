@@ -12,6 +12,7 @@ services:
     volumes:
       - ./src:/home/workspace/src
       - ./docker/hadoop:/home/workspace/modifications
+      - hadoop_namenode:/hadoop/dfs/name
     environment:
       - CLUSTER_NAME=test
     env_file:
@@ -19,13 +20,51 @@ services:
     networks:
       - kafka-network
 
-  datanode:
+  datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode
+    container_name: datanode1
+    hostname: datanode1
     ports:
       - 9864:9864
     volumes:
       - ./docker/hadoop:/home/workspace/modifications
+      - hadoop_datanode1:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+    networks:
+      - kafka-network
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    hostname: datanode2
+    ports:
+      - 9866:9864
+    volumes:
+      - ./docker/hadoop:/home/workspace/modifications
+      - hadoop_datanode2:/hadoop/dfs/data
+    depends_on:
+      - namenode
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+    networks:
+      - kafka-network
+
+  datanode3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode3
+    hostname: datanode3
+    ports:
+      - 9867:9864
+    volumes:
+      - ./docker/hadoop:/home/workspace/modifications
+      - hadoop_datanode3:/hadoop/dfs/data
     depends_on:
       - namenode
     environment:
@@ -43,7 +82,7 @@ services:
     volumes:
       - ./docker/hadoop:/home/workspace/modifications
     environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode1:9864 datanode2:9866 datanode3:9867"
     env_file:
       - ./hadoop.env
     networks:
@@ -57,7 +96,7 @@ services:
     volumes:
       - ./docker/hadoop:/home/workspace/modifications
     environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode1:9864 datanode2:9866 datanode3:9867 resourcemanager:8088"
     env_file:
       - ./hadoop.env
     networks:
@@ -70,8 +109,9 @@ services:
       - 8188:8188
     volumes:
       - ./docker/hadoop:/home/workspace/modifications
+      - hadoop_historyserver:/hadoop/yarn/timeline
     environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode1:9864 datanode2:9866 datanode3:9867 resourcemanager:8088"
     env_file:
       - ./hadoop.env
     networks:
@@ -190,7 +230,7 @@ services:
     container_name: consumer1
     build: ./docker/consumer1
     volumes:
-      - .:/code
+      - ./docker/consumer1:/code
     depends_on:
       - kafka1
       - kafka2
@@ -203,7 +243,7 @@ services:
     container_name: consumer2
     build: ./docker/consumer2
     volumes:
-      - .:/code
+      - ./docker/consumer2:/code
     depends_on:
       - kafka1
       - kafka2
@@ -215,3 +255,10 @@ services:
 networks:
   kafka-network:
     external: true
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode1:
+  hadoop_datanode2:
+  hadoop_datanode3:
+  hadoop_historyserver:

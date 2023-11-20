@@ -1,5 +1,5 @@
 #!/bin/bash
-containers=(datanode namenode nodemanager resourcemanager historyserver)
+containers=(datanode1 datanode2 datanode3 namenode nodemanager resourcemanager historyserver)
 
 for container in "${containers[@]}"; do
     docker exec -it "$container" chmod +x /home/workspace/modifications/modify-env.sh

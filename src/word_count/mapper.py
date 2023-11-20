@@ -1,28 +1,26 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
-import json
+import io
+import re
+import sys
+import os
+
+dir = os.path.dirname(__file__)
+sys.path.append(dir)
 
 from porter import PorterStemmer
 from text_parser import TextParser
 
 
-parser = TextParser("./stopwords.txt")
+parser = TextParser(os.path.join(dir, "stopwords.txt"))
 stemmer = PorterStemmer()
 
-# input comes from standard input (STDIN)
+
 for line in sys.stdin:
     try:
-        # Parse JSON
-        record = json.loads(line)
-        
-        # Extract the desired fields
-        tweet_id = record['tweet_id']
-        tweet = record['text']
-        
-        # Text processing
         stem_cache = dict()
         word_counts = dict()
-        words = parser.parse(tweet)
+        words = parser.parse(line)
         
         for j, word in enumerate(words):
             if word in stem_cache.keys():
@@ -32,10 +30,8 @@ for line in sys.stdin:
             if _word not in word_counts.keys(): word_counts[_word] = 0
             word_counts[_word] += 1
         
-        # Output the result
         for k, v in word_counts.items():
             print('%s\t%s' % (k, v))
             
     except ValueError as e:
-        # Handle error in case of bad data
         continue

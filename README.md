@@ -1,6 +1,4 @@
-# Kafka Data Pipeline Demo
-
-<div style="color: red">WARN: I am running this demo on a laptop with 16GB RAM and Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz and the OS is Ubuntu 22.04, hardware configurations below this are not guaranteed to run the code correctly </div>
+# Kafka Hadoop Pipeline Demo
 
 ### 1. Installation
 
@@ -13,19 +11,73 @@
 1. download data from `https://www.kaggle.com/datasets/thoughtvector/customer-support-on-twitter/data`
 2. put `twcs.csv` into `./data`
 
-### 3. Usage
+### 3. Configuration
 
-launch docker containers
+- **Kafka**
 
+    + zookeeper
+    + brokers: kafka1, kafka2, kafka3
+
+- **Hadoop**
+  
+    + namenode
+    + nodemanager
+    + resourcemanager
+    + historyserver
+    + datanodes: datanode1, datanode2, datanode3
+
+- **Producer**
+- **Consumer**
+
+    + consumers: consumer1, consumer2
+
+### 4. Usage
+
+#### 4.1 Start Basic Services
+
+launch docker containers for hadoop and kafka cluster
 
 ```bash
 cd <YourPath>/Kafka-Pipeline
 systemctl --user start docker-desktop
 docker network create kafka-network
-docker-compose up --build
+docker-compose build
+chmod +x ./run-kafka-hadoop.sh
+./run-kafka-hadoop.sh
 ```
 
-### 4. visualization
+in new terminal, run
+
+```bash
+chmod +x ./modify-env.sh
+./modify-env.sh
+```
+
+to install python3 for all hadoop nodes, after all kafka and hadoop nodes are set, run
+
+```bash
+chmod +x ./run-producer-consumer.sh
+./run-producer-consumer.sh
+```
+
+in new terminal to start the producer and consumers
+
+#### 4.2 MapReduce Word Count
+
+start mapreduce job in new terminal
+
+```bash
+docker exec -it namdenode /bin/bash
+
+# in the opened namenode terminal
+cd /home/workspace/src/word_count
+chmod +x ./run.sh
+./run.sh
+```
+
+output should be in file `/output/word_count/part-00000` of the hadoop hdfs
+
+### 5. Visualization
 
 kafka-ui: `localhost:8080`
 dash: `localhost:8050`

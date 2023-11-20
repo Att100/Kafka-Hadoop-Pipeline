@@ -22,5 +22,5 @@ for chunk in pd.read_csv("data/twcs.csv", chunksize=5, skiprows=0, nrows=500000)
     
     for msg in msgs:
         time.sleep(random.randint(0, 100) * 0.001)
-        producer.send(random.choice(['A', 'B']), value=msg)
+        producer.send(random.choice(['A', 'B']), value=msg["text"])
         # print(msg)

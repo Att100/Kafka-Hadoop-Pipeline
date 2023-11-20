@@ -1,0 +1,1 @@
+docker-compose up producer consumer1 consumer2
